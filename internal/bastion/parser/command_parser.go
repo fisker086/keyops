@@ -347,13 +347,13 @@ func (e *CommandExtractor) processLine() {
 	}
 
 	// 检查是否包含提示符
-	if containsPromptMarker(cleanLine) {
+	hasPrompt := containsPromptMarker(cleanLine)
+
+	if hasPrompt {
 		// 直接从包含提示符的行中提取命令（提示符和命令在同一行）
 		cmd := extractCommandFromLine(cleanLine)
-		log.Printf("[CommandExtractor] Prompt detected, extracted command: %q (ignored: %v)", cmd, shouldIgnoreSimple(cmd))
 		if cmd != "" && !shouldIgnoreSimple(cmd) {
 			if e.onCommandFunc != nil {
-				log.Printf("[CommandExtractor]  Calling onCommandFunc for: %q", cmd)
 				e.onCommandFunc(cmd)
 			}
 			e.waitingForCommand = false
@@ -371,15 +371,12 @@ func (e *CommandExtractor) processLine() {
 		isIgnored := shouldIgnoreSimple(cleanLine)
 		isCommand := looksLikeCommand(cleanLine)
 
-		log.Printf("[CommandExtractor] Waiting for command, line: %q, isOutput: %v, isIgnored: %v, isCommand: %v", cleanLine, isOutput, isIgnored, isCommand)
-
 		if isOutput {
 			e.waitingForCommand = false
 		} else if isIgnored {
 			e.waitingForCommand = false
 		} else if isCommand {
 			if e.onCommandFunc != nil {
-				log.Printf("[CommandExtractor]  Calling onCommandFunc for: %q", cleanLine)
 				e.onCommandFunc(cleanLine)
 			}
 			e.waitingForCommand = false
@@ -398,14 +395,11 @@ func (e *CommandExtractor) processLine() {
 	}
 }
 
-// containsPromptMarker 检查行是否包含提示符标记
+// containsPromptMarker 检查行是否包含提示符标记（通用方法，不依赖特定格式）
+// 策略：识别 prompt 的共同特征，而不是匹配特定格式
 func containsPromptMarker(line string) bool {
-	// 必须包含 @ 符号（user@host 格式）
-	if !strings.Contains(line, "@") {
-		return false
-	}
-
-	// 必须包含提示符结束标记（可以在末尾，也可以后面跟空格和命令）
+	// 必须包含提示符结束标记（$ 或 #）
+	// 支持多种格式：$ 、# 、]$ 、]# 或行尾的 $、#、]$、]#
 	hasMarker := strings.Contains(line, "$ ") ||
 		strings.Contains(line, "# ") ||
 		strings.Contains(line, "]$ ") ||
@@ -415,17 +409,120 @@ func containsPromptMarker(line string) bool {
 		strings.HasSuffix(line, "]$") ||
 		strings.HasSuffix(line, "]#")
 
-	return hasMarker
+	if !hasMarker {
+		return false
+	}
+
+	// 通用检测：找到所有可能的 prompt 标记位置
+	// 检查标记前的内容是否看起来像 prompt（而不是命令的一部分）
+	promptMarkers := []string{"]# ", "]$ ", "# ", "$ "}
+	
+	for _, marker := range promptMarkers {
+		idx := strings.LastIndex(line, marker)
+		if idx >= 0 {
+			beforeMarker := line[:idx]
+			// 检查标记前的内容是否像 prompt
+			if looksLikePromptPrefix(beforeMarker) {
+				return true
+			}
+		}
+	}
+
+	// 检查行尾的标记
+	endMarkers := []string{"]#", "]$", "#", "$"}
+	for _, marker := range endMarkers {
+		if strings.HasSuffix(line, marker) {
+			beforeMarker := line[:len(line)-len(marker)]
+			if looksLikePromptPrefix(beforeMarker) {
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
-// extractCommandFromLine 从包含提示符的行中提取命令
-// 格式：root@host:~# command 或 [user@host path]$ command
+// looksLikePromptPrefix 检查字符串是否看起来像 prompt 的前缀部分
+// 不依赖特定格式，而是识别 prompt 的共同特征
+func looksLikePromptPrefix(s string) bool {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return false
+	}
+
+	// Prompt 的共同特征：
+	// 1. 通常包含标识符（hostname、username、container ID 等）
+	// 2. 可能包含路径分隔符（: 或 /）
+	// 3. 可能包含 @ 符号（传统格式：user@host）
+	// 4. 不应该包含太多空格（prompt 通常是紧凑的）
+	// 5. 不应该看起来像命令输出
+
+	// 检查是否包含太多空格（prompt 通常是紧凑的）
+	spaceCount := strings.Count(s, " ")
+	if spaceCount > 2 {
+		// 太多空格，可能是命令输出而不是 prompt
+		return false
+	}
+
+	// 优先检查：包含 @ 符号通常是传统 prompt 格式（user@host:path）
+	hasAtSymbol := strings.Contains(s, "@")
+	
+	// 检查是否包含路径分隔符（: 或 /）
+	hasPathSeparator := strings.Contains(s, ":") || strings.Contains(s, "/")
+	
+	// 检查是否包含常见的标识符字符（字母、数字、连字符、下划线）
+	hasIdentifier := false
+	for _, r := range s {
+		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || 
+		   (r >= '0' && r <= '9') || r == '-' || r == '_' || r == '.' {
+			hasIdentifier = true
+			break
+		}
+	}
+
+	// 如果包含 @ 符号，且空格不多，很可能是 prompt
+	if hasAtSymbol && spaceCount <= 2 {
+		// 进一步检查：不应该看起来像命令输出
+		if !looksLikeOutput(s) {
+			return true
+		}
+	}
+
+	// 如果包含路径分隔符或标识符，且空格不多，可能是 prompt
+	if (hasPathSeparator || hasIdentifier) && spaceCount <= 2 {
+		// 进一步检查：不应该看起来像命令输出
+		if !looksLikeOutput(s) {
+			return true
+		}
+	}
+
+	// 特殊情况：只有标识符，没有路径分隔符（如简单的 hostname$）
+	if !hasPathSeparator && hasIdentifier && spaceCount == 0 && len(s) > 0 {
+		// 检查是否主要是标识符字符
+		identifierChars := 0
+		for _, r := range s {
+			if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || 
+			   (r >= '0' && r <= '9') || r == '-' || r == '_' || r == '.' {
+				identifierChars++
+			}
+		}
+		// 如果大部分是标识符字符，可能是 prompt
+		if identifierChars > len(s)/2 {
+			return true
+		}
+	}
+
+	return false
+}
+
+// extractCommandFromLine 从包含提示符的行中提取命令（通用方法）
+// 策略：找到最后一个有效的 prompt 标记，从标记后提取命令
 func extractCommandFromLine(line string) string {
 	// 如果行中包含多个提示符（如清屏后的情况），使用最后一个
 	// 例如: "root@host:# root@host:# pwd" -> 应该提取 "pwd"
 	markersWithSpace := []string{"]# ", "]$ ", "# ", "$ "}
 
-	// 找到所有提示符标记的位置
+	// 找到所有可能的提示符标记位置，使用最后一个有效的
 	var lastMarkerPos int = -1
 	var lastMarker string
 
@@ -437,22 +534,14 @@ func extractCommandFromLine(line string) string {
 				break
 			}
 			pos += idx
-			// 确保标记前有 @ 符号（是提示符的一部分）
 			beforeMarker := line[:pos]
-			if strings.Contains(beforeMarker, "@") {
-				// 检查是否是真正的提示符（不是命令的一部分）
-				// 例如排除 "rm -rf /path/to/file# "
-				atPos := strings.LastIndex(beforeMarker, "@")
-				if atPos >= 0 {
-					promptPart := line[atPos:pos]
-					// 简单检查：提示符部分不应该包含太多空格（通常是 user@host:path 格式）
-					spaceCount := strings.Count(promptPart, " ")
-					if spaceCount <= 1 {
-						lastMarkerPos = pos
-						lastMarker = m
-					}
-				}
+			
+			// 使用通用的 prompt 检测方法
+			if looksLikePromptPrefix(beforeMarker) {
+				lastMarkerPos = pos
+				lastMarker = m
 			}
+			
 			idx = pos + len(m)
 		}
 	}
@@ -467,13 +556,9 @@ func extractCommandFromLine(line string) string {
 
 		cmd := strings.TrimSpace(line[cmdStart:])
 
-		// 再次检查提取的命令是否包含提示符（不应该）
-		if strings.Contains(cmd, "@") && strings.Contains(cmd, ":") {
-			// 可能又是一个提示符，忽略
-			// 例如：提取出来的是 "root@host:"
-			if isPromptPattern(cmd) {
-				return ""
-			}
+		// 检查提取的命令是否又是一个提示符（不应该）
+		if isPromptPattern(cmd) {
+			return ""
 		}
 
 		return cmd
@@ -483,9 +568,9 @@ func extractCommandFromLine(line string) string {
 	endMarkers := []string{"]#", "]$", "#", "$"}
 	for _, m := range endMarkers {
 		if strings.HasSuffix(line, m) {
-			// 确保标记前有 @ 符号
 			beforeMarker := line[:len(line)-len(m)]
-			if strings.Contains(beforeMarker, "@") {
+			// 使用通用的 prompt 检测方法
+			if looksLikePromptPrefix(beforeMarker) {
 				// 提示符单独一行，没有命令
 				return ""
 			}
@@ -655,29 +740,38 @@ func stripANSISimple(s string) string {
 	return result.String()
 }
 
-// isPromptPattern 检查是否是提示符模式
-// 提示符格式：user@host:path$ 或 user@host:path#
+// isPromptPattern 检查是否是提示符模式（通用方法）
+// 不依赖特定格式，而是识别 prompt 的共同特征
 func isPromptPattern(line string) bool {
-	// 必须包含 @
-	if !strings.Contains(line, "@") {
+	// 必须包含提示符标记
+	hasMarker := strings.HasSuffix(line, "$") || 
+		strings.HasSuffix(line, "#") ||
+		strings.HasSuffix(line, "]$") ||
+		strings.HasSuffix(line, "]#") ||
+		strings.Contains(line, "$ ") ||
+		strings.Contains(line, "# ")
+
+	if !hasMarker {
 		return false
 	}
 
-	// 检查是否匹配常见提示符格式
-	// 1. user@host:path# command 或 user@host:path$ command
-	// 2. [user@host path]# command 或 [user@host path]$ command
-	promptPatterns := []*regexp.Regexp{
-		regexp.MustCompile(`^[a-zA-Z0-9_-]+@[a-zA-Z0-9_.-]+:[^$#]*[$#]\s*$`),             // user@host:path$ 或 user@host:path#
-		regexp.MustCompile(`^[a-zA-Z0-9_-]+@[a-zA-Z0-9_.-]+:~?/?[^$#]*[$#]\s*$`),         // root@container123:/path#
-		regexp.MustCompile(`^\[[^\]]+@[^\]]+\s+[^\]]+\][$#]\s*$`),                        // [user@host path]$ 或 [user@host path]#
-		regexp.MustCompile(`^[a-zA-Z0-9_-]+@[a-zA-Z0-9_:.-]+:\s*$`),                      // user@host: (只有冒号，没有路径和提示符)
-		regexp.MustCompile(`^[a-zA-Z0-9_-]+@[a-zA-Z0-9_.-]+:~\s*$`),                      // user@host:~ (以波浪号结尾)
-		regexp.MustCompile(`^[a-zA-Z0-9_-]+@[a-zA-Z0-9_.-]+:(/[a-zA-Z0-9_/.-]*)?~?\s*$`), // user@host:/path 或 user@host:/path~
-	}
-
-	for _, pattern := range promptPatterns {
-		if pattern.MatchString(line) {
-			return true
+	// 移除提示符标记，检查剩余部分是否像 prompt 前缀
+	// 找到最后一个提示符标记的位置
+	markers := []string{"]# ", "]$ ", "# ", "$ ", "]#", "]$", "#", "$"}
+	for _, marker := range markers {
+		if strings.HasSuffix(line, marker) {
+			beforeMarker := line[:len(line)-len(marker)]
+			if looksLikePromptPrefix(beforeMarker) {
+				return true
+			}
+		} else if strings.Contains(line, marker) {
+			idx := strings.LastIndex(line, marker)
+			if idx >= 0 {
+				beforeMarker := line[:idx]
+				if looksLikePromptPrefix(beforeMarker) {
+					return true
+				}
+			}
 		}
 	}
 

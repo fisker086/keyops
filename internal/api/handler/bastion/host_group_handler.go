@@ -1,6 +1,7 @@
 package bastion
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -153,18 +154,38 @@ func (h *HostGroupHandler) UpdateGroup(c *gin.Context) {
 		return
 	}
 
-	// 更新字段
-	existingGroup.Name = updates.Name
-	existingGroup.Description = updates.Description
-	existingGroup.Color = updates.Color
-	existingGroup.Icon = updates.Icon
-	existingGroup.SortOrder = updates.SortOrder
+	// 验证必填字段
+	if updates.Name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -1,
+			"msg":  "Group name is required",
+		})
+		return
+	}
+
+	// 更新字段（只更新提供的字段）
+	if updates.Name != "" {
+		existingGroup.Name = updates.Name
+	}
+	if updates.Description != "" || updates.Description == "" {
+		existingGroup.Description = updates.Description
+	}
+	if updates.Color != "" {
+		existingGroup.Color = updates.Color
+	}
+	if updates.Icon != "" {
+		existingGroup.Icon = updates.Icon
+	}
+	// SortOrder 如果是0也可能是有效值，所以检查是否在请求中提供了
+	if updates.SortOrder != existingGroup.SortOrder {
+		existingGroup.SortOrder = updates.SortOrder
+	}
 
 	if err := h.groupRepo.Update(existingGroup); err != nil {
 		log.Printf("[HostGroupHandler] Failed to update group: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code": -1,
-			"msg":  "Failed to update group",
+			"msg":  fmt.Sprintf("Failed to update group: %v", err),
 		})
 		return
 	}
@@ -284,6 +305,15 @@ func (h *HostGroupHandler) AddHostsToGroup(c *gin.Context) {
 		return
 	}
 
+	// 检查分组是否存在
+	if _, err := h.groupRepo.FindByID(groupID); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"code": -1,
+			"msg":  "Group not found",
+		})
+		return
+	}
+
 	// 获取当前用户ID
 	addedBy := "system"
 	if userID, exists := c.Get("userID"); exists {
@@ -294,7 +324,7 @@ func (h *HostGroupHandler) AddHostsToGroup(c *gin.Context) {
 		log.Printf("[HostGroupHandler] Failed to add hosts to group: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code": -1,
-			"msg":  "Failed to add hosts to group",
+			"msg":  fmt.Sprintf("Failed to add hosts to group: %v", err),
 		})
 		return
 	}
@@ -322,11 +352,20 @@ func (h *HostGroupHandler) RemoveHostsFromGroup(c *gin.Context) {
 		return
 	}
 
+	// 检查分组是否存在
+	if _, err := h.groupRepo.FindByID(groupID); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"code": -1,
+			"msg":  "Group not found",
+		})
+		return
+	}
+
 	if err := h.groupRepo.RemoveHostsFromGroup(groupID, req.HostIDs); err != nil {
 		log.Printf("[HostGroupHandler] Failed to remove hosts from group: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code": -1,
-			"msg":  "Failed to remove hosts from group",
+			"msg":  fmt.Sprintf("Failed to remove hosts from group: %v", err),
 		})
 		return
 	}

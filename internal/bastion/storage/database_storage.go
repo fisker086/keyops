@@ -339,8 +339,11 @@ func (s *DatabaseStorage) SaveCommand(cmd *CommandRecord) error {
 
 // saveCommandToDB 实际的命令保存逻辑
 func (s *DatabaseStorage) saveCommandToDB(cmd *CommandRecord) error {
-	// 创建命令历史记录
-	cmdHistory := model.CommandHistory{
+	log.Printf("[DatabaseStorage] Saving command: session=%s, host=%s, user=%s, command=%q", 
+		cmd.SessionID, cmd.HostIP, cmd.Username, cmd.Command)
+	
+	// 使用统一的 CommandRecord 模型（表名是 command_histories）
+	commandRecord := model.CommandRecord{
 		ProxyID:    cmd.ProxyID,
 		SessionID:  cmd.SessionID,
 		HostID:     cmd.HostID,
@@ -351,15 +354,19 @@ func (s *DatabaseStorage) saveCommandToDB(cmd *CommandRecord) error {
 		Output:     cmd.Output,
 		ExitCode:   cmd.ExitCode,
 		ExecutedAt: cmd.ExecutedAt,
+		DurationMs: cmd.DurationMs,
 	}
 
+	log.Printf("[DatabaseStorage] Command record prepared: %+v", commandRecord)
+
 	// 保存到数据库
-	if err := s.db.Create(&cmdHistory).Error; err != nil {
-		log.Printf("[DatabaseStorage]  Failed to save command %q: %v", cmd.Command, err)
+	if err := s.db.Create(&commandRecord).Error; err != nil {
+		log.Printf("[DatabaseStorage] Failed to save command %q: %v", cmd.Command, err)
 		return err
 	}
 
-	log.Printf("[DatabaseStorage]  Command saved successfully: %q (session: %s)", cmd.Command, cmd.SessionID)
+	log.Printf("[DatabaseStorage] Command saved successfully: id=%d, command=%q, session=%s", 
+		commandRecord.ID, cmd.Command, cmd.SessionID)
 	return nil
 }
 

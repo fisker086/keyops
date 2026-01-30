@@ -3,6 +3,7 @@ package bastion
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -542,6 +543,7 @@ func (h *SessionHandler) GetCommandRecords(c *gin.Context) {
 
 	commands, total, err := h.service.GetCommandRecords(page, pageSize, search, hostFilter)
 	if err != nil {
+		log.Printf("[SessionHandler] ERROR: Failed to get command records: %v", err)
 		c.JSON(http.StatusInternalServerError, model.Error(500, err.Error()))
 		return
 	}

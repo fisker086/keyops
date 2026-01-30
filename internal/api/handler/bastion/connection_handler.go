@@ -233,7 +233,7 @@ func (h *ConnectionHandler) HandleConnection(c *gin.Context) {
 		h.handleDirectConnection(ws, hostID, sessionID, userInfo, systemUser, width, height)
 	} else {
 		log.Printf("[Connection] Using PROXY mode for session %s (proxy: %s)", sessionID, decision.ProxyID)
-		h.handleProxyConnection(ws, hostID, sessionID, userInfo, decision, systemUser, width, height)
+		h.handleProxyConnection(ws, hostID, sessionID, userInfo, decision, systemUser)
 	}
 }
 
@@ -252,6 +252,12 @@ func (h *ConnectionHandler) handleDirectConnection(ws *websocket.Conn, hostID st
 
 	log.Printf("[Connection] Connecting directly to %s (%s:%d) - login user: %s, system user: %s (%s)",
 		host.Name, host.IP, host.Port, userInfo.Username, systemUser.Name, systemUser.Username)
+
+	// 发送连接开始消息
+	ws.WriteJSON(map[string]interface{}{
+		"type":    "info",
+		"message": fmt.Sprintf("正在直连到 %s (%s:%d)...", host.Name, host.IP, host.Port),
+	})
 
 	// 加载 Windows/RDP 全局配置（guacd、录制等）
 	windowsCfg := h.loadWindowsSettings()
@@ -446,32 +452,57 @@ func (h *ConnectionHandler) handleDirectConnection(ws *websocket.Conn, hostID st
 		}
 	} else {
 		// SSH 连接
-		if err := h.proxySSHConnectionWithTimeout(ws, host, systemUser, sessionID, rec, nil, userInfo, &connectionSuccess, startTime); err != nil {
+		// 创建命令解析器，用于记录命令到数据库
+		commandParser := parser.NewCommandExtractor(func(cmd string) {
+			log.Printf("[Connection] ===== Command detected ===== session=%s, host=%s, user=%s, command=%q", 
+				sessionID, host.IP, userInfo.Username, cmd)
+			
+			// 记录命令到数据库
+			commandRecord := &storage.CommandRecord{
+				ProxyID:    "api-server-direct",
+				SessionID:  sessionID,
+				HostID:     host.ID,
+				UserID:     userInfo.UserID,
+				Username:   userInfo.Username,
+				HostIP:     host.IP,
+				Command:    cmd,
+				ExecutedAt: time.Now(),
+			}
+			
+			log.Printf("[Connection] Preparing to save command record: %+v", commandRecord)
+			
+			if err := h.storage.SaveCommand(commandRecord); err != nil {
+				log.Printf("[Connection] ERROR: Failed to save command: %v", err)
+			} else {
+				log.Printf("[Connection] SUCCESS: Command saved successfully: %s", cmd)
+			}
+		})
+		
+		if err := h.proxySSHConnectionWithTimeout(ws, host, systemUser, sessionID, rec, commandParser, userInfo, &connectionSuccess, startTime); err != nil {
 			log.Printf("[Connection] SSH connection error: %v", err)
+
+			// 根据错误类型显示不同的消息
 			var errorMsg string
 			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
 				errorMsg = fmt.Sprintf("\r\n\033[1;31m连接超时！\033[0m\r\n无法连接到 %s:%d\r\n请检查：\r\n1. 主机是否在线\r\n2. 网络是否可达\r\n3. SSH服务是否正常运行\r\n4. 防火墙是否允许连接\r\n", host.IP, host.Port)
 			} else {
-				errorMsg = fmt.Sprintf("\r\n\033[1;31m连接失败！\033[0m\r\n无法连接到 %s:%d\r\n错误：%v\r\n", host.IP, host.Port, err)
+				errorMsg = fmt.Sprintf("\r\n\033[1;31m连接失败！\033[0m\r\n错误：%v\r\n", err)
 			}
-			// 发送错误消息并关闭 WebSocket 连接
+
 			ws.WriteJSON(map[string]interface{}{
 				"type":    "error",
 				"message": errorMsg,
 			})
-			// 等待一小段时间确保消息已发送，然后关闭连接
-			time.Sleep(100 * time.Millisecond)
-			ws.Close()
-			return
+			// connectionSuccess 保持 false，defer 中会标记为 failed
+		} else {
+			// 连接函数正常返回（注意：connectionSuccess 已在Shell启动时设置）
+			log.Printf("[Connection] SSH connection function returned normally for session %s", sessionID)
 		}
 	}
-
-	// 设置连接成功标记
-	connectionSuccess = true
 }
 
 // handleProxyConnection 通过代理连接主机
-func (h *ConnectionHandler) handleProxyConnection(ws *websocket.Conn, hostID string, sessionID string, userInfo *UserInfo, decision *model.RoutingDecision, systemUser *model.SystemUser, width string, height string) {
+func (h *ConnectionHandler) handleProxyConnection(ws *websocket.Conn, hostID string, sessionID string, userInfo *UserInfo, decision *model.RoutingDecision, systemUser *model.SystemUser) {
 	host, err := h.hostRepo.FindByID(hostID)
 	if err != nil {
 		ws.WriteJSON(map[string]interface{}{
@@ -880,7 +911,10 @@ func (h *ConnectionHandler) proxySSHConnection(ws *websocket.Conn, host *model.H
 				rec.RecordOutput(data)
 				// 喂给命令解析器解析命令（如果存在）
 				if cmdParser != nil {
+					log.Printf("[Connection] Feeding data to command parser, length=%d", len(data))
 					cmdParser.Feed(data)
+				} else {
+					log.Printf("[Connection] WARNING: Command parser is nil, command will not be recorded!")
 				}
 				ws.WriteJSON(map[string]interface{}{
 					"type": "output",
@@ -903,6 +937,7 @@ func (h *ConnectionHandler) proxySSHConnection(ws *websocket.Conn, host *model.H
 				rec.RecordOutput(data)
 				// stderr 也可能包含命令提示符（如果解析器存在）
 				if cmdParser != nil {
+					log.Printf("[Connection] Feeding stderr data to command parser, length=%d", len(data))
 					cmdParser.Feed(data)
 				}
 				ws.WriteJSON(map[string]interface{}{

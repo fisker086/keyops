@@ -1,0 +1,117 @@
+{"level":"INFO","time":"2026-01-30T17:29:09.424+0800","caller":"app/bootstrap.go:35","msg":"✅ Logger initialized: output=both, level=info"}
+{"level":"INFO","time":"2026-01-30T17:29:09.484+0800","caller":"database/init.go:143","msg":"Database 'keyops' created or already exists"}
+{"level":"INFO","time":"2026-01-30T17:29:09.486+0800","caller":"database/init.go:50","msg":"Connecting to mysql database..."}
+{"level":"INFO","time":"2026-01-30T17:29:09.499+0800","caller":"database/init.go:94","msg":"Database connection pool configured: MaxOpenConns=100, MaxIdleConns=10, ConnMaxLifetime=3600s"}
+{"level":"INFO","time":"2026-01-30T17:29:09.499+0800","caller":"database/init.go:102","msg":"Database connection verified successfully"}
+{"level":"INFO","time":"2026-01-30T17:29:09.499+0800","caller":"database/init.go:109","msg":"Database connection double-checked successfully"}
+{"level":"INFO","time":"2026-01-30T17:29:09.499+0800","caller":"database/init.go:228","msg":"Checking database tables..."}
+{"level":"INFO","time":"2026-01-30T17:29:09.521+0800","caller":"database/init.go:328","msg":"Table ssh_sessions does not exist, will be created"}
+{"level":"INFO","time":"2026-01-30T17:29:09.572+0800","caller":"database/init.go:342","msg":"Starting auto-migration for 1 table(s)..."}
+{"level":"INFO","time":"2026-01-30T17:29:09.618+0800","caller":"database/init.go:349","msg":"Successfully migrated 1 table(s)"}
+{"level":"INFO","time":"2026-01-30T17:29:09.618+0800","caller":"database/init.go:366","msg":"Creating default data..."}
+{"level":"INFO","time":"2026-01-30T17:29:09.655+0800","caller":"database/init.go:621","msg":"Created default settings"}
+{"level":"INFO","time":"2026-01-30T17:29:09.655+0800","caller":"database/init.go:402","msg":"Default data creation completed"}
+{"level":"INFO","time":"2026-01-30T17:29:09.655+0800","caller":"database/database.go:44","msg":"Database initialized successfully"}
+{"level":"INFO","time":"2026-01-30T17:29:09.656+0800","caller":"app/bootstrap.go:43","msg":"Database initialized successfully"}
+{"level":"INFO","time":"2026-01-30T17:29:09.665+0800","caller":"app/bootstrap.go:51","msg":"✅ Redis initialized successfully - distributed features enabled"}
+{"level":"INFO","time":"2026-01-30T17:29:09.855+0800","caller":"casbin/casbin.go:269","msg":"从数据库加载Casbin模型配置，共 5 条记录"}
+{"level":"INFO","time":"2026-01-30T17:29:09.869+0800","caller":"casbin/casbin.go:108","msg":"✅ Redis Watcher已配置（地址: redis:6379），支持多机器权限同步"}
+{"level":"INFO","time":"2026-01-30T17:29:09.869+0800","caller":"casbin/casbin.go:122","msg":"Casbin权限管理器初始化成功"}
+{"level":"INFO","time":"2026-01-30T17:29:09.869+0800","caller":"app/bootstrap.go:60","msg":"Casbin permission manager initialized successfully"}
+{"level":"INFO","time":"2026-01-30T17:29:09.869+0800","caller":"app/app.go:39","msg":"Repositories initialized"}
+{"level":"INFO","time":"2026-01-30T17:29:09.876+0800","caller":"app/services.go:78","msg":"Datasource sync scheduler started"}
+{"level":"INFO","time":"2026-01-30T17:29:09.876+0800","caller":"app/app.go:43","msg":"Services initialized"}
+{"level":"INFO","time":"2026-01-30T17:29:09.876+0800","caller":"app/app.go:47","msg":"Unified Audit Service initialized"}
+{"level":"INFO","time":"2026-01-30T17:29:09.876+0800","caller":"app/app.go:48","msg":"   Supports: SSH Gateway + WebShell"}
+{"level":"INFO","time":"2026-01-30T17:29:09.879+0800","caller":"app/app.go:52","msg":"Notification Manager initialized"}
+{"level":"INFO","time":"2026-01-30T17:29:09.882+0800","caller":"app/app.go:56","msg":"Background services initialized"}
+{"level":"INFO","time":"2026-01-30T17:29:09.882+0800","caller":"app/app.go:57","msg":"   Asset sync scheduler started"}
+{"level":"INFO","time":"2026-01-30T17:29:09.882+0800","caller":"app/app.go:58","msg":"   Host status monitor started (interval: 5 minutes)"}
+{"level":"INFO","time":"2026-01-30T17:29:09.882+0800","caller":"app/handlers.go:68","msg":"WebShell Storage Adapter created"}
+{"level":"INFO","time":"2026-01-30T17:29:09.887+0800","caller":"app/handlers.go:186","msg":"Found 0 enabled approval configurations"}
+{"level":"INFO","time":"2026-01-30T17:29:09.894+0800","caller":"app/app.go:62","msg":"Handlers initialized"}
+{"level":"INFO","time":"2026-01-30T17:29:09.894+0800","caller":"app/ssh_server.go:35","msg":""}
+{"level":"INFO","time":"2026-01-30T17:29:09.895+0800","caller":"app/ssh_server.go:36","msg":"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"}
+{"level":"INFO","time":"2026-01-30T17:29:09.895+0800","caller":"app/ssh_server.go:37","msg":"Initializing SSH Gateway Server..."}
+{"level":"INFO","time":"2026-01-30T17:29:09.895+0800","caller":"app/ssh_server.go:38","msg":"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"}
+{"level":"INFO","time":"2026-01-30T17:29:09.896+0800","caller":"app/ssh_server.go:81","msg":"   Instance ID:    33aadc0aeea5"}
+{"level":"INFO","time":"2026-01-30T17:29:09.896+0800","caller":"app/ssh_server.go:82","msg":"   Host Key Mode:  Database Shared (multi-instance)"}
+{"level":"INFO","time":"2026-01-30T17:29:09.896+0800","caller":"app/ssh_server.go:83","msg":"   Storage:        ssh_host_keys table"}
+{"level":"INFO","time":"2026-01-30T17:29:09.896+0800","caller":"app/ssh_server.go:84","msg":"   Note: No local files will be generated"}
+{"level":"INFO","time":"2026-01-30T17:29:10.047+0800","caller":"app/ssh_server.go:114","msg":""}
+{"level":"INFO","time":"2026-01-30T17:29:10.047+0800","caller":"app/ssh_server.go:115","msg":"SSH Gateway Server initialized"}
+{"level":"INFO","time":"2026-01-30T17:29:10.047+0800","caller":"app/ssh_server.go:116","msg":"   Listen Address: :2222"}
+{"level":"INFO","time":"2026-01-30T17:29:10.047+0800","caller":"app/ssh_server.go:117","msg":"   Max Sessions:   100"}
+{"level":"INFO","time":"2026-01-30T17:29:10.047+0800","caller":"app/ssh_server.go:118","msg":"   Authentication: Password, PublicKey"}
+{"level":"INFO","time":"2026-01-30T17:29:10.047+0800","caller":"app/ssh_server.go:119","msg":""}
+{"level":"INFO","time":"2026-01-30T17:29:10.047+0800","caller":"app/ssh_server.go:120","msg":"Usage: ssh <username>@<server-ip> -p 2222"}
+{"level":"INFO","time":"2026-01-30T17:29:10.047+0800","caller":"app/ssh_server.go:121","msg":"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"}
+{"level":"INFO","time":"2026-01-30T17:29:10.047+0800","caller":"app/ssh_server.go:122","msg":""}
+{"level":"INFO","time":"2026-01-30T17:29:10.049+0800","caller":"app/server.go:106","msg":""}
+{"level":"INFO","time":"2026-01-30T17:29:10.049+0800","caller":"app/server.go:201","msg":""}
+{"level":"INFO","time":"2026-01-30T17:29:10.049+0800","caller":"app/server.go:202","msg":"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"}
+{"level":"INFO","time":"2026-01-30T17:29:10.049+0800","caller":"app/server.go:203","msg":"ZJump Unified Server v2.0 - Intelligent Routing Architecture"}
+{"level":"INFO","time":"2026-01-30T17:29:10.049+0800","caller":"app/server.go:204","msg":"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"}
+{"level":"INFO","time":"2026-01-30T17:29:10.049+0800","caller":"app/server.go:205","msg":""}
+{"level":"INFO","time":"2026-01-30T17:29:10.049+0800","caller":"app/server.go:206","msg":"Features:"}
+{"level":"INFO","time":"2026-01-30T17:29:10.049+0800","caller":"app/server.go:207","msg":"   • Authentication & Authorization"}
+{"level":"INFO","time":"2026-01-30T17:29:10.049+0800","caller":"app/server.go:208","msg":"   • Intelligent Routing - Auto path selection"}
+{"level":"INFO","time":"2026-01-30T17:29:10.049+0800","caller":"app/server.go:209","msg":"   • Direct Connection - Default mode, low latency"}
+{"level":"INFO","time":"2026-01-30T17:29:10.049+0800","caller":"app/server.go:210","msg":"   • Proxy Forwarding - Use Proxy Agent in isolated networks"}
+{"level":"INFO","time":"2026-01-30T17:29:10.049+0800","caller":"app/server.go:211","msg":"   • Full Audit Trail - Complete operation logs"}
+{"level":"INFO","time":"2026-01-30T17:29:10.049+0800","caller":"app/server.go:213","msg":"   • SSH Gateway - CLI login with full audit"}
+{"level":"INFO","time":"2026-01-30T17:29:10.049+0800","caller":"app/server.go:215","msg":""}
+{"level":"INFO","time":"2026-01-30T17:29:10.049+0800","caller":"app/server.go:216","msg":"🔀 Connection Modes:"}
+{"level":"INFO","time":"2026-01-30T17:29:10.049+0800","caller":"app/server.go:217","msg":"   • Web Mode   - Browser access (:8080)"}
+{"level":"INFO","time":"2026-01-30T17:29:10.049+0800","caller":"app/server.go:219","msg":"   • SSH Mode   - SSH client (:2222)"}
+{"level":"INFO","time":"2026-01-30T17:29:10.049+0800","caller":"app/server.go:221","msg":"   • Direct     - API Server connects to target directly"}
+{"level":"INFO","time":"2026-01-30T17:29:10.049+0800","caller":"app/server.go:222","msg":"   • Proxy      - Via Proxy Agent (8022) for isolated networks"}
+{"level":"INFO","time":"2026-01-30T17:29:10.049+0800","caller":"app/server.go:223","msg":""}
+{"level":"INFO","time":"2026-01-30T17:29:10.049+0800","caller":"app/server.go:224","msg":"Tips:"}
+{"level":"INFO","time":"2026-01-30T17:29:10.049+0800","caller":"app/server.go:225","msg":"   Start only this service for both Web and SSH access"}
+{"level":"INFO","time":"2026-01-30T17:29:10.049+0800","caller":"app/server.go:226","msg":"   Proxy Agent is optional, needed only for isolated networks"}
+{"level":"INFO","time":"2026-01-30T17:29:10.049+0800","caller":"app/server.go:227","msg":""}
+{"level":"INFO","time":"2026-01-30T17:29:10.049+0800","caller":"app/server.go:228","msg":"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"}
+{"level":"INFO","time":"2026-01-30T17:29:10.049+0800","caller":"app/server.go:229","msg":""}
+{"level":"INFO","time":"2026-01-30T17:29:13.051+0800","caller":"system/expiration_service.go:60","msg":"Expiration service started, check interval: 1h0m0s"}
+{"level":"INFO","time":"2026-01-30T17:29:13.051+0800","caller":"app/server.go:86","msg":"Expiration Service started"}
+{"level":"INFO","time":"2026-01-30T17:29:13.052+0800","caller":"app/server.go:87","msg":"   Checking for expired users and permissions"}
+{"level":"INFO","time":"2026-01-30T17:29:14.050+0800","caller":"oncall/notification_service.go:51","msg":"On-call notification service started, check interval: 1m0s"}
+{"level":"INFO","time":"2026-01-30T17:29:14.050+0800","caller":"app/server.go:101","msg":"On-Call Notification Service started"}
+{"level":"INFO","time":"2026-01-30T17:29:14.050+0800","caller":"app/server.go:102","msg":"   Checking for upcoming shifts (interval: 1 minute)"}
+{"level":"INFO","time":"2026-01-30T17:29:15.051+0800","caller":"system/expiration_service.go:145","msg":"Starting expiration check..."}
+{"level":"INFO","time":"2026-01-30T17:29:15.059+0800","caller":"system/expiration_service.go:191","msg":"Found 0 users to warn about expiration"}
+{"level":"INFO","time":"2026-01-30T17:29:15.060+0800","caller":"system/expiration_service.go:225","msg":"Found 0 expired users"}
+{"level":"INFO","time":"2026-01-30T17:29:15.064+0800","caller":"system/expiration_service.go:310","msg":"Found 0 permission rules to warn about expiration"}
+{"level":"INFO","time":"2026-01-30T17:29:15.064+0800","caller":"system/expiration_service.go:345","msg":"Found 0 expired permission rules"}
+{"level":"INFO","time":"2026-01-30T17:29:15.064+0800","caller":"system/expiration_service.go:157","msg":"Expiration check completed"}
+{"level":"INFO","time":"2026-01-30T18:29:13.053+0800","caller":"system/expiration_service.go:145","msg":"Starting expiration check..."}
+{"level":"INFO","time":"2026-01-30T18:29:13.068+0800","caller":"system/expiration_service.go:191","msg":"Found 0 users to warn about expiration"}
+{"level":"INFO","time":"2026-01-30T18:29:13.069+0800","caller":"system/expiration_service.go:225","msg":"Found 0 expired users"}
+{"level":"INFO","time":"2026-01-30T18:29:13.070+0800","caller":"system/expiration_service.go:310","msg":"Found 0 permission rules to warn about expiration"}
+{"level":"INFO","time":"2026-01-30T18:29:13.072+0800","caller":"system/expiration_service.go:345","msg":"Found 0 expired permission rules"}
+{"level":"INFO","time":"2026-01-30T18:29:13.073+0800","caller":"system/expiration_service.go:157","msg":"Expiration check completed"}
+{"level":"INFO","time":"2026-01-30T19:29:13.051+0800","caller":"system/expiration_service.go:145","msg":"Starting expiration check..."}
+{"level":"INFO","time":"2026-01-30T19:29:13.052+0800","caller":"system/expiration_service.go:191","msg":"Found 0 users to warn about expiration"}
+{"level":"INFO","time":"2026-01-30T19:29:13.053+0800","caller":"system/expiration_service.go:225","msg":"Found 0 expired users"}
+{"level":"INFO","time":"2026-01-30T19:29:13.054+0800","caller":"system/expiration_service.go:310","msg":"Found 0 permission rules to warn about expiration"}
+{"level":"INFO","time":"2026-01-30T19:29:13.054+0800","caller":"system/expiration_service.go:345","msg":"Found 0 expired permission rules"}
+{"level":"INFO","time":"2026-01-30T19:29:13.055+0800","caller":"system/expiration_service.go:157","msg":"Expiration check completed"}
+{"level":"INFO","time":"2026-01-30T20:29:13.051+0800","caller":"system/expiration_service.go:145","msg":"Starting expiration check..."}
+{"level":"INFO","time":"2026-01-30T20:29:13.077+0800","caller":"system/expiration_service.go:191","msg":"Found 0 users to warn about expiration"}
+{"level":"INFO","time":"2026-01-30T20:29:13.077+0800","caller":"system/expiration_service.go:225","msg":"Found 0 expired users"}
+{"level":"INFO","time":"2026-01-30T20:29:13.081+0800","caller":"system/expiration_service.go:310","msg":"Found 0 permission rules to warn about expiration"}
+{"level":"INFO","time":"2026-01-30T20:29:13.081+0800","caller":"system/expiration_service.go:345","msg":"Found 0 expired permission rules"}
+{"level":"INFO","time":"2026-01-30T20:29:13.082+0800","caller":"system/expiration_service.go:157","msg":"Expiration check completed"}
+{"level":"INFO","time":"2026-01-30T21:29:13.051+0800","caller":"system/expiration_service.go:145","msg":"Starting expiration check..."}
+{"level":"INFO","time":"2026-01-30T21:29:13.053+0800","caller":"system/expiration_service.go:191","msg":"Found 0 users to warn about expiration"}
+{"level":"INFO","time":"2026-01-30T21:29:13.053+0800","caller":"system/expiration_service.go:225","msg":"Found 0 expired users"}
+{"level":"INFO","time":"2026-01-30T21:29:13.054+0800","caller":"system/expiration_service.go:310","msg":"Found 0 permission rules to warn about expiration"}
+{"level":"INFO","time":"2026-01-30T21:29:13.054+0800","caller":"system/expiration_service.go:345","msg":"Found 0 expired permission rules"}
+{"level":"INFO","time":"2026-01-30T21:29:13.055+0800","caller":"system/expiration_service.go:157","msg":"Expiration check completed"}
+{"level":"INFO","time":"2026-01-30T22:29:13.051+0800","caller":"system/expiration_service.go:145","msg":"Starting expiration check..."}
+{"level":"INFO","time":"2026-01-30T22:29:13.053+0800","caller":"system/expiration_service.go:191","msg":"Found 0 users to warn about expiration"}
+{"level":"INFO","time":"2026-01-30T22:29:13.053+0800","caller":"system/expiration_service.go:225","msg":"Found 0 expired users"}
+{"level":"INFO","time":"2026-01-30T22:29:13.054+0800","caller":"system/expiration_service.go:310","msg":"Found 0 permission rules to warn about expiration"}
+{"level":"INFO","time":"2026-01-30T22:29:13.054+0800","caller":"system/expiration_service.go:345","msg":"Found 0 expired permission rules"}
+{"level":"INFO","time":"2026-01-30T22:29:13.055+0800","caller":"system/expiration_service.go:157","msg":"Expiration check completed"}

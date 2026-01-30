@@ -1,0 +1,1 @@
+import{H as e}from"./index-D6BTcUK7.js";const i={list:t=>e.get("/api/ticket-drafts",{params:t}),save:t=>e.post("/api/ticket-drafts",t),update:(t,r)=>e.put(`/api/ticket-drafts/${t}`,r),delete:t=>e.delete(`/api/ticket-drafts/${t}`)};export{i as t};

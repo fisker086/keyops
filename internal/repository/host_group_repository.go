@@ -114,14 +114,36 @@ func (r *HostGroupRepository) RemoveHostFromGroup(groupID, hostID string) error 
 
 // AddHostsToGroup 批量添加主机到分组
 func (r *HostGroupRepository) AddHostsToGroup(groupID string, hostIDs []string, addedBy string) error {
-	members := make([]model.HostGroupMember, 0, len(hostIDs))
-	for _, hostID := range hostIDs {
-		members = append(members, model.HostGroupMember{
-			GroupID: groupID,
-			HostID:  hostID,
-			AddedBy: addedBy,
-		})
+	// 检查哪些主机已经在分组中
+	var existingMembers []model.HostGroupMember
+	if err := r.db.Where("group_id = ? AND host_id IN ?", groupID, hostIDs).
+		Find(&existingMembers).Error; err != nil {
+		return fmt.Errorf("failed to check existing members: %w", err)
 	}
+
+	// 构建已存在主机的ID集合
+	existingHostIDs := make(map[string]bool)
+	for _, member := range existingMembers {
+		existingHostIDs[member.HostID] = true
+	}
+
+	// 只添加不在分组中的主机
+	members := make([]model.HostGroupMember, 0)
+	for _, hostID := range hostIDs {
+		if !existingHostIDs[hostID] {
+			members = append(members, model.HostGroupMember{
+				GroupID: groupID,
+				HostID:  hostID,
+				AddedBy: addedBy,
+			})
+		}
+	}
+
+	// 如果没有需要添加的主机，直接返回成功
+	if len(members) == 0 {
+		return nil
+	}
+
 	return r.db.Create(&members).Error
 }
 

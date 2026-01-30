@@ -1,1 +1,0 @@
-import{u as a,j as r,B as n,w as e,x as o,T as t}from"./index-CJIrazW8.js";function l(){const{t:s}=a();return r.jsx(n,{sx:{p:3},children:r.jsx(e,{children:r.jsxs(o,{children:[r.jsx(t,{variant:"h5",gutterBottom:!0,children:s("menu.billSummary")}),r.jsx(t,{variant:"body2",color:"text.secondary",children:s("bill.summary.description")})]})})})}export{l as default};

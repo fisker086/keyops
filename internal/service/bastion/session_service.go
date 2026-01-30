@@ -389,7 +389,7 @@ func (s *SessionService) GetCommandRecords(page, pageSize int, search, hostFilte
 		pageSize = 10
 	}
 
-	// 直接从 command_records 表查询
+	// 从 command_histories 表查询（CommandRecord 的表名）
 	var records []model.CommandRecord
 	var total int64
 
@@ -407,12 +407,14 @@ func (s *SessionService) GetCommandRecords(page, pageSize int, search, hostFilte
 
 	// 统计总数
 	if err := query.Count(&total).Error; err != nil {
+		log.Printf("[SessionService] ERROR: Failed to count command records: %v", err)
 		return nil, 0, err
 	}
 
 	// 分页查询
 	offset := (page - 1) * pageSize
 	if err := query.Offset(offset).Limit(pageSize).Order("executed_at DESC").Find(&records).Error; err != nil {
+		log.Printf("[SessionService] ERROR: Failed to query command records: %v", err)
 		return nil, 0, err
 	}
 
