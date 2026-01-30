@@ -30,7 +30,7 @@ COPY ui/web/dist ./pkg/static/dist
 
 # Build api-server binary (static) with embedded frontend
 # 使用 embed_frontend build tag 启用前端嵌入
-ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64
+# ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64
 RUN go build -tags embed_frontend -o /out/keyops-api ./cmd/api-server
 
 # ---------- Stage 2: Runtime (minimal alpine) ----------
