@@ -1,1 +1,0 @@
-import{u as e,j as r,B as o,w as n,x as a,T as t}from"./index-z51Q_M-r.js";function d(){const{t:s}=e();return r.jsx(o,{sx:{p:3},children:r.jsx(n,{children:r.jsxs(a,{children:[r.jsx(t,{variant:"h5",gutterBottom:!0,children:s("menu.billRecords")}),r.jsx(t,{variant:"body2",color:"text.secondary",children:s("bill.records.description")})]})})})}export{d as default};

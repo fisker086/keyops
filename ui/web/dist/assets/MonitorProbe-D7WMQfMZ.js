@@ -1,1 +1,0 @@
-import{u as n,j as r,B as s,w as e,x as a,T as t}from"./index-z51Q_M-r.js";function x(){const{t:o}=n();return r.jsx(s,{sx:{p:3},children:r.jsx(e,{children:r.jsxs(a,{children:[r.jsx(t,{variant:"h5",gutterBottom:!0,children:o("menu.monitorProbe")}),r.jsx(t,{variant:"body2",color:"text.secondary",children:o("monitor.probe.description")})]})})})}export{x as default};

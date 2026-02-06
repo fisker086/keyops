@@ -1,0 +1,1 @@
+import{u as n,j as r,B as a,w as e,x as o,T as s}from"./index-DQgwGClU.js";function l(){const{t}=n();return r.jsx(a,{sx:{p:3},children:r.jsx(e,{children:r.jsxs(o,{children:[r.jsx(s,{variant:"h5",gutterBottom:!0,children:t("menu.billVM")}),r.jsx(s,{variant:"body2",color:"text.secondary",children:t("bill.vm.description")})]})})})}export{l as default};
