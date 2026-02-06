@@ -51,6 +51,13 @@ func ServeStaticFiles() gin.HandlerFunc {
 			return
 		}
 
+		// 避免 http.FileServer 返回 301 重定向
+		if path == "/assets/" || path == "/assets" {
+			c.Status(http.StatusNotFound)
+			c.Abort()
+			return
+		}
+
 		// 尝试打开文件
 		filePath := strings.TrimPrefix(path, "/")
 		if filePath == "" {
@@ -83,3 +90,4 @@ func ServeStaticFiles() gin.HandlerFunc {
 		c.Abort()
 	}
 }
+
